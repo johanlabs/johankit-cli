@@ -13,7 +13,6 @@ async function paste(dir) {
         let files;
         try {
             const cleanContent = content.replace(/^\uFEFF/, "").trim();
-            ;
             files = JSON.parse(cleanContent);
         }
         catch (e) {
@@ -22,7 +21,7 @@ async function paste(dir) {
         if (!Array.isArray(files)) {
             throw new Error("Clipboard content is not a JSON array");
         }
-        // Simple check if it's a file snapshot (paste logic)
+        // Validação simples do snapshot
         const isValidSnapshot = files.every(f => typeof f.path === 'string' && typeof f.content === 'string');
         if (!isValidSnapshot) {
             throw new Error("JSON does not match FileSnapshot structure {path, content}");
