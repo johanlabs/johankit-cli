@@ -1,0 +1,56 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.prompt = prompt;
+// src/cli/commands/prompt.ts
+const scan_1 = require("../../core/scan");
+const clipboard_1 = require("../../core/clipboard");
+async function prompt(dir, userPrompt) {
+    const snapshot = (0, scan_1.scanDir)(dir);
+    const template = `
+You are an AI software engineer.
+
+You will receive a JSON array representing a snapshot of a codebase.
+Each item has the following structure:
+
+{
+  "path": "relative/path/to/file.ext",
+  "content": "full file content"
+}
+
+---
+
+SNAPSHOT
+${JSON.stringify(snapshot, null, 2)}
+
+---
+
+YOUR TASK
+Propose changes according to the user request.
+
+Return ONLY a JSON array of patches.
+
+PATCH FORMAT (STRICT)
+{
+  "type": "modify" | "create" | "delete",
+  "path": "relative/path/to/file.ext",
+  "content": "FULL updated file content (omit for delete)"
+}
+
+IMPORTANT RULES
+- Do NOT return explanations
+- Do NOT return markdown
+- Return ONLY valid JSON
+
+USER REQUEST
+${userPrompt}
+`;
+    try {
+        await (0, clipboard_1.copyToClipboard)(template.trim());
+        process.stdout.write(template.trim());
+        process.stdout.write("\n\n✔ Prompt + Snapshot copied to clipboard\n");
+    }
+    catch (e) {
+        process.stdout.write(template.trim());
+        process.stderr.write("\n✖ Failed to copy to clipboard (output only)\n");
+    }
+}
