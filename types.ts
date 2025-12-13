@@ -2,6 +2,7 @@
 export interface FileSnapshot {
   path: string;
   content: string;
+  type?: "modify" | "create" | "delete";
 }
 
 export interface ScanOptions {

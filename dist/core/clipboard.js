@@ -1,7 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.copyToClipboard = copyToClipboard;
-exports.readClipboard = readClipboard;
+exports.readClipboard = exports.copyToClipboard = void 0;
 // src/core/clipboard.ts
 const child_process_1 = require("child_process");
 function copyToClipboard(text) {
@@ -23,6 +22,7 @@ function copyToClipboard(text) {
         child.stdin.end();
     });
 }
+exports.copyToClipboard = copyToClipboard;
 function readClipboard() {
     return new Promise((resolve, reject) => {
         let command = "xclip";
@@ -46,8 +46,9 @@ function readClipboard() {
                 reject(new Error(error || "Clipboard read failed"));
             }
             else {
-                resolve(output.trim());
+                resolve(output.trim().replace(/^\uFEFF/, ""));
             }
         });
     });
 }
+exports.readClipboard = readClipboard;

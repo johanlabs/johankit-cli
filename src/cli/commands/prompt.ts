@@ -30,7 +30,6 @@ Return ONLY a JSON array of patches.
 
 PATCH FORMAT (STRICT)
 {
-  "type": "modify" | "create" | "delete",
   "path": "relative/path/to/file.ext",
   "content": "FULL updated file content (omit for delete)"
 }

@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.validatePatches = validatePatches;
+exports.validatePatches = void 0;
 /**
  * Valida se um objeto se parece com um Patch de DiffPatch válido.
  * Não faz validação completa de esquema (JSON Schema), mas verifica a estrutura básica.
@@ -38,3 +38,4 @@ function validatePatches(patches) {
     // Assume que o array validado está no formato correto de DiffPatch[]
     return patches;
 }
+exports.validatePatches = validatePatches;

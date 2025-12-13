@@ -49,7 +49,7 @@ export function readClipboard(): Promise<string> {
       if (code !== 0 && error && !output) {
         reject(new Error(error || "Clipboard read failed"));
       } else {
-        resolve(output.trim());
+        resolve(output.trim().replace(/^\uFEFF/, ""));
       }
     });
   });

@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.sync = sync;
+exports.sync = void 0;
 // src/cli/commands/sync.ts
 const scan_1 = require("../../core/scan");
 const diff_1 = require("../../core/diff");
@@ -31,6 +31,7 @@ async function sync(dir) {
         process.exit(1);
     }
 }
+exports.sync = sync;
 function readStdin() {
     return new Promise(resolve => {
         let data = "";

@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.loadConfig = loadConfig;
+exports.loadConfig = void 0;
 // src/core/config.ts
 const path_1 = __importDefault(require("path"));
 const fs_1 = require("fs");
@@ -49,3 +49,4 @@ function loadConfig(basePath) {
         };
     }
 }
+exports.loadConfig = loadConfig;

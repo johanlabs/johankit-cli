@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.scanDir = scanDir;
+exports.scanDir = void 0;
 // src/core/scan.ts
 const fs_1 = __importDefault(require("fs"));
 const path_1 = __importDefault(require("path"));
@@ -64,3 +64,4 @@ function scanDir(basePath, options = {}) {
     loop(base);
     return result;
 }
+exports.scanDir = scanDir;
