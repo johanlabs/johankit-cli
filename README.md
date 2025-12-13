@@ -1,62 +1,62 @@
 # JohanKit
 
-JohanKit é uma ferramenta de linha de comando para copiar, colar, gerar prompts e sincronizar snapshots de código.
+JohanKit is a command-line tool for copying, pasting, generating prompts, and syncing code snapshots.
 
-## Instalação
+## Installation
 
 `bash
 npm install -g johankit
 `
 
-## Comandos
+## Commands
 
 ### copy
-Copia os arquivos de um diretório para a área de transferência em formato JSON.
+Copies files from a directory to the clipboard in JSON format.
 
 `bash
-tool copy <dir> [exts]
+johankit copy <dir> [exts]
 `
-- `dir`: Diretório a ser escaneado (padrão: atual)
-- `exts`: Lista de extensões separadas por vírgula (ex: `ts,js`)
+- `dir`: Directory to scan (default: current)
+- `exts`: Comma-separated list of extensions (e.g., `ts,js`)
 
 ### paste
-Restaura arquivos a partir do JSON da área de transferência.
+Restores files from JSON in the clipboard.
 
 `bash
-tool paste <dir>
+johankit paste <dir>
 `
-- `dir`: Diretório onde os arquivos serão criados (padrão: atual)
+- `dir`: Directory where files will be created (default: current)
 
 ### prompt
-Gera um prompt completo para AI com snapshot do diretório.
+Generates a complete AI prompt with a directory snapshot.
 
 `bash
-tool prompt <dir> "<user request>"
+johankit prompt <dir> "<user request>"
 `
-- `dir`: Diretório a ser escaneado (padrão: atual)
-- `<user request>`: Pedido específico que você quer que a AI execute sobre o snapshot
+- `dir`: Directory to scan (default: current)
+- `<user request>`: Specific request for the AI to apply on the snapshot
 
 ### sync
-Aplica patches JSON no diretório e atualiza a área de transferência com o novo snapshot.
+Applies JSON patches to the directory and updates the clipboard with the new snapshot.
 
 `bash
-tool sync <dir>
+johankit sync <dir>
 `
-- `dir`: Diretório alvo (padrão: atual)
+- `dir`: Target directory (default: current)
 
-## Exemplo de Uso
+## Usage Example
 
 `bash
-tool copy src
-tool prompt src "Refatorar para async/await"
-tool sync src
+johankit copy src
+johankit prompt src "Refactor to async/await"
+johankit sync src
 `
 
-## Configuração
+## Configuration
 
-O JohanKit pode usar um arquivo `johankit.yaml` no diretório base para configurar padrões, como ignorar diretórios específicos.
+JohanKit can use a `johankit.yaml` file in the base directory to configure defaults, such as ignored directories.
 
-Exemplo `johankit.yaml`:
+Example `johankit.yaml`:
 
 `yaml
 ignore:
@@ -65,11 +65,11 @@ ignore:
   - .git
 `
 
-## Requisitos
+## Requirements
 
 - Node.js >= 14
-- Sistema operacional compatível com clipboard (`xclip`, `pbcopy` ou `clip`)
+- Clipboard-compatible OS (`xclip`, `pbcopy`, or `clip`)
 
-## Licença
+## License
 
 ISC
