@@ -11,8 +11,8 @@ export async function paste(dir: string) {
         }
 
         let files;
-            try {
-                const cleanContent = content.replace(/^\uFEFF/, "").trim();;
+        try {
+            const cleanContent = content.replace(/^\uFEFF/, "").trim();
             files = JSON.parse(cleanContent);
         } catch (e) {
             throw new Error("Clipboard content is not valid JSON");
@@ -22,7 +22,7 @@ export async function paste(dir: string) {
             throw new Error("Clipboard content is not a JSON array");
         }
 
-        // Simple check if it's a file snapshot (paste logic)
+        // Validação simples do snapshot
         const isValidSnapshot = files.every(f =>
             typeof f.path === 'string' && typeof f.content === 'string'
         );
@@ -32,15 +32,12 @@ export async function paste(dir: string) {
         }
 
         writeFiles(dir, files, true);
-
         process.stdout.write("✔ Pasted from clipboard\n");
     } catch (error) {
         process.stderr.write("✖ Paste failed\n");
-
         if (error instanceof Error) {
             process.stderr.write(`${error.message}\n`);
         }
-
         process.exit(1);
     }
 }
