@@ -1,8 +1,10 @@
+// src/cli/commands/sync.ts
 import { scanDir } from "../../core/scan";
 import { applyDiff } from "../../core/diff";
 import { copyToClipboard } from "../../core/clipboard";
 import { validatePatches } from "../../core/validation";
 import { writeFiles } from "../../core/write";
+import { runInVm } from "../../core/vm";
 
 export async function sync(dir: string) {
   try {
@@ -55,9 +57,9 @@ USER REQUEST
 
     let patches;
     try {
-      patches = JSON.parse(input);
+      patches = runInVm(`module.exports = function() { return ${input}; }`)();
     } catch {
-      throw new Error("Invalid JSON input");
+      throw new Error("Invalid JSON input or execution in VM failed");
     }
 
     const validated = validatePatches(patches);

@@ -1,5 +1,7 @@
+// src/cli/commands/prompt.ts
 import { scanDir } from "../../core/scan";
 import { copyToClipboard } from "../../core/clipboard";
+import { runInVm } from "../../core/vm";
 
 export async function prompt(dir: string, userPrompt: string) {
   const snapshot = scanDir(dir);
@@ -44,11 +46,12 @@ ${userPrompt}
 `;
 
   try {
+    runInVm(`module.exports = async function() { return ${JSON.stringify(template.trim())}; }`)();
     await copyToClipboard(template.trim());
     process.stdout.write(template.trim());
     process.stdout.write("\n\n✔ Prompt + Snapshot copied to clipboard\n");
   } catch (e) {
     process.stdout.write(template.trim());
-    process.stderr.write("\n✖ Failed to copy to clipboard (output only)\n");
+    process.stderr.write("\n✖ Failed to execute in VM or copy to clipboard\n");
   }
 }
