@@ -8,11 +8,6 @@ Think of it as your personal **code snapshot toolkit**: lightweight, fast, and a
 
 ## Why JohanKit?
 
-The name combines:
-
-- **Johan** – a nod to the “creator” or developer archetype.
-- **Kit** – a set of practical tools.
-
 JohanKit is a “kit for developers,” crafted to streamline coding sessions, prototype features quickly, and integrate seamlessly with AI-assisted refactoring or review tools.
 
 ---
