@@ -1,7 +1,6 @@
 // src/cli/commands/paste.ts
 import { writeFiles } from "../../core/write";
 import { readClipboard } from "../../core/clipboard";
-import cleanCodeBlock from "../../utils/cleanCodeBlock";
 
 export async function paste(dir: string) {
     try {
@@ -13,8 +12,10 @@ export async function paste(dir: string) {
 
         let files;
         try {
-            const { lang, cleaned } = cleanCodeBlock(content) 
-            files = JSON.parse(cleaned);
+            let cleanContent = content.replace(/^\uFEFF/, "").trim();
+            // Remove code block markers ``` ou ````` caso existam
+            cleanContent = cleanContent.replace(/```+\s*json?/g, "").replace(/```+/g, "");
+            files = JSON.parse(cleanContent);
         } catch (e) {
             throw new Error("Clipboard content is not valid JSON");
         }

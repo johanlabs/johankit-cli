@@ -1,13 +1,9 @@
 "use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.paste = void 0;
 // src/cli/commands/paste.ts
 const write_1 = require("../../core/write");
 const clipboard_1 = require("../../core/clipboard");
-const cleanCodeBlock_1 = __importDefault(require("../../utils/cleanCodeBlock"));
 async function paste(dir) {
     try {
         const content = await (0, clipboard_1.readClipboard)();
@@ -16,8 +12,10 @@ async function paste(dir) {
         }
         let files;
         try {
-            const { lang, cleaned } = (0, cleanCodeBlock_1.default)(content);
-            files = JSON.parse(cleaned);
+            let cleanContent = content.replace(/^\uFEFF/, "").trim();
+            // Remove code block markers ``` ou ````` caso existam
+            cleanContent = cleanContent.replace(/```+\s*json?/g, "").replace(/```+/g, "");
+            files = JSON.parse(cleanContent);
         }
         catch (e) {
             throw new Error("Clipboard content is not valid JSON");
