@@ -26,8 +26,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const copy_1 = require("../../../cli/commands/copy");
 const scan = __importStar(require("../../../core/scan"));
 const clipboard = __importStar(require("../../../core/clipboard"));
-jest.mock('../../../core/scan');
-jest.mock('../../../core/clipboard');
+jest.mock('../../core/scan');
+jest.mock('../../core/clipboard');
 describe('copy', () => {
     it('should copy single file snapshot to clipboard', () => {
         scan.scanDir.mockReturnValue([{ path: 'file.txt', content: 'hello' }]);

@@ -26,8 +26,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const paste_1 = require("../../../cli/commands/paste");
 const clipboard = __importStar(require("../../../core/clipboard"));
 const write = __importStar(require("../../../core/write"));
-jest.mock('../../../core/clipboard');
-jest.mock('../../../core/write');
+jest.mock('../../core/clipboard');
+jest.mock('../../core/write');
 describe('paste', () => {
     it('should write files from clipboard JSON', async () => {
         clipboard.readClipboard.mockResolvedValue(JSON.stringify([{ path: 'a.txt', content: 'hi' }]));

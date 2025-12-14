@@ -1,7 +1,7 @@
 import { scanDir } from "../../core/scan";
 import { copyToClipboard } from "../../core/clipboard";
 
-export function copy(input: string | string[]) {
+export async function copy(input: string | string[]) {
   let snapshot;
 
   if (Array.isArray(input)) {
@@ -13,10 +13,9 @@ export function copy(input: string | string[]) {
       return fileSnapshot[0];
     });
   } else {
-    const stat = scanDir(input);
-    snapshot = stat.length === 1 ? stat : scanDir(input);
+    snapshot = scanDir(input);
   }
 
   const clipboardJSON = JSON.stringify(snapshot, null, 2); // <- garante JSON válido
-  copyToClipboard(clipboardJSON);
+  await copyToClipboard(clipboardJSON);
 }
