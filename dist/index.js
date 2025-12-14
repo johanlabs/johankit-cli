@@ -11,7 +11,7 @@ async function main() {
         case "copy": {
             const dir = args[0] ?? ".";
             const exts = args[1]?.split(",");
-            await (0, copy_1.copy)(dir, exts);
+            await (0, copy_1.copy)(dir);
             break;
         }
         case "paste": {
@@ -48,7 +48,6 @@ Usage:
 
 Examples:
   johankit prompt src "refatorar para async/await"
-  # cole o JSON de patches retornado pelo LLM
   johankit sync src
 `);
 }

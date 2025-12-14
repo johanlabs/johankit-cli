@@ -38,7 +38,8 @@ PATCH FORMAT (STRICT)
 IMPORTANT RULES
 - Do NOT return explanations
 - Do NOT return markdown
-- Return ONLY valid JSON
+- Return ONLY valid JSON inside the "\`\`\`"
+- Always return within a Markdown Code Block (with "\`\`\`json" syntax highlighting)")
 
 USER REQUEST
 ${userPrompt}

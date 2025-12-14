@@ -12,7 +12,7 @@ async function main() {
     case "copy": {
       const dir = args[0] ?? ".";
       const exts = args[1]?.split(",");
-      await copy(dir, exts);
+      await copy(dir);
       break;
     }
 
