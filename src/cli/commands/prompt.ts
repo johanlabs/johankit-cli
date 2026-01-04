@@ -16,6 +16,12 @@ Each item has the following structure:
   "content": "full file content"
 }
 
+You may also generate shell commands that should be executed to apply necessary changes:
+{
+  "type": "console",
+  "command": "shell command to run"
+}
+
 ---
 
 SNAPSHOT
@@ -26,12 +32,17 @@ ${JSON.stringify(snapshot, null, 2)}
 YOUR TASK
 Propose changes according to the user request.
 
-Return ONLY a JSON array of patches.
+Return ONLY a JSON array of patches or console commands.
 
 PATCH FORMAT (STRICT)
 {
   "path": "relative/path/to/file.ext",
   "content": "FULL updated file content (omit for delete)"
+}
+OR
+{
+  "type": "console",
+  "command": "shell command to run"
 }
 
 IMPORTANT RULES
