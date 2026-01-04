@@ -5,27 +5,32 @@ import { paste } from "./cli/commands/paste";
 import { prompt } from "./cli/commands/prompt";
 import { sync } from "./cli/commands/sync";
 
-const [, , command, ...args] = process.argv;
+const args = process.argv.slice(2);
+const command = args[0];
 
 async function main() {
+  const runAll = process.argv.includes("--run");
+  // Removemos a flag --run dos argumentos para não confundir os diretórios
+  const cleanArgs = args.filter(a => a !== "--run");
+
   try {
     switch (command) {
       case "copy": {
-        const dir = args[0] ?? ".";
-        const exts = args[1]?.split(",");
+        const dir = cleanArgs[1] ?? ".";
+        const exts = cleanArgs[2]?.split(",");
         await copy(dir, exts);
         break;
       }
 
       case "paste": {
-        const dir = args[0] ?? ".";
-        await paste(dir);
+        const dir = cleanArgs[1] ?? ".";
+        await paste(dir, runAll);
         break;
       }
 
       case "prompt": {
-        const dir = args[0] ?? ".";
-        const userPrompt = args.slice(1).join(" ");
+        const dir = cleanArgs[1] ?? ".";
+        const userPrompt = cleanArgs.slice(2).join(" ");
         if (!userPrompt) {
           console.error("Missing user prompt");
           process.exit(1);
@@ -35,8 +40,8 @@ async function main() {
       }
 
       case "sync": {
-        const dir = args[0] ?? ".";
-        await sync(dir);
+        const dir = cleanArgs[1] ?? ".";
+        await sync(dir, runAll);
         break;
       }
 
@@ -55,13 +60,12 @@ function help() {
   console.log(`
 Usage:
   johankit copy <dir> [exts]
-  johankit paste <dir>
+  johankit paste <dir> [--run]
   johankit prompt <dir> "<user request>"
-  johankit sync <dir>
+  johankit sync <dir> [--run]
 
-Examples:
-  johankit prompt src "refactor to async/await"
-  johankit sync src
+Options:
+  --run    Execute console commands during paste/sync
 `);
 }
 

@@ -12,30 +12,35 @@ export async function paste(dir: string, runAll = false) {
             throw new Error("Clipboard empty or inaccessible");
         }
 
-        let files;
+        let items;
         try {
             const { cleaned } = cleanCodeBlock(content);
-            files = JSON.parse(cleaned);
+            items = JSON.parse(cleaned);
         } catch (e) {
             throw new Error("Clipboard content is not valid JSON");
         }
 
-        if (!Array.isArray(files)) {
+        if (!Array.isArray(items)) {
             throw new Error("Clipboard content is not a JSON array");
         }
 
-        for (const item of files) {
-            if (item.type === 'console') {
+        for (const item of items) {
+            // 1. Caso seja um comando de console
+            if (item.type === 'console' && item.command) {
                 if (runAll) {
                     console.log(`> Executing: ${item.command}`);
                     execSync(item.command, { stdio: 'inherit', cwd: dir });
                 } else {
-                    console.log(`> Skipped command: ${item.command} (use flag to run)`);
+                    console.log(`> Skipped command: ${item.command} (use --run to execute)`);
                 }
-            } else if (item.path && typeof item.content === 'string') {
+            } 
+            // 2. Caso seja um snapshot de arquivo (com ou sem type)
+            else if (item.path && typeof item.content === 'string') {
                 writeFiles(dir, [item], true);
-            } else {
-                throw new Error(`Invalid item in clipboard: ${JSON.stringify(item)}`);
+            } 
+            // 3. Item inválido
+            else {
+                console.warn(`! Skipping invalid item: ${JSON.stringify(item)}`);
             }
         }
 
