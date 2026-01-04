@@ -8,39 +8,46 @@ import { sync } from "./cli/commands/sync";
 const [, , command, ...args] = process.argv;
 
 async function main() {
-  switch (command) {
-    case "copy": {
-      const dir = args[0] ?? ".";
-      const exts = args[1]?.split(",");
-      await copy(dir);
-      break;
-    }
-
-    case "paste": {
-      const dir = args[0] ?? ".";
-      await paste(dir);
-      break;
-    }
-
-    case "prompt": {
-      const dir = args[0] ?? ".";
-      const userPrompt = args.slice(1).join(" ");
-      if (!userPrompt) {
-        console.error("Missing user prompt");
-        process.exit(1);
+  try {
+    switch (command) {
+      case "copy": {
+        const dir = args[0] ?? ".";
+        const exts = args[1]?.split(",");
+        await copy(dir, exts);
+        break;
       }
-      await prompt(dir, userPrompt);
-      break;
-    }
 
-    case "sync": {
-      const dir = args[0] ?? ".";
-      await sync(dir);
-      break;
-    }
+      case "paste": {
+        const dir = args[0] ?? ".";
+        await paste(dir);
+        break;
+      }
 
-    default:
-      help();
+      case "prompt": {
+        const dir = args[0] ?? ".";
+        const userPrompt = args.slice(1).join(" ");
+        if (!userPrompt) {
+          console.error("Missing user prompt");
+          process.exit(1);
+        }
+        await prompt(dir, userPrompt);
+        break;
+      }
+
+      case "sync": {
+        const dir = args[0] ?? ".";
+        await sync(dir);
+        break;
+      }
+
+      default:
+        help();
+    }
+  } catch (error) {
+    if (error instanceof Error) {
+      console.error(`Error: ${error.message}`);
+    }
+    process.exit(1);
   }
 }
 
@@ -53,7 +60,7 @@ Usage:
   johankit sync <dir>
 
 Examples:
-  johankit prompt src "refatorar para async/await"
+  johankit prompt src "refactor to async/await"
   johankit sync src
 `);
 }

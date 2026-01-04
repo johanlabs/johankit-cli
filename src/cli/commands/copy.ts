@@ -1,21 +1,9 @@
 import { scanDir } from "../../core/scan";
 import { copyToClipboard } from "../../core/clipboard";
 
-export async function copy(input: string | string[]) {
-  let snapshot;
-
-  if (Array.isArray(input)) {
-    snapshot = input.map(path => {
-      const fileSnapshot = scanDir(path);
-      if (fileSnapshot.length !== 1) {
-        throw new Error(`Expected single file for path: ${path}`);
-      }
-      return fileSnapshot[0];
-    });
-  } else {
-    snapshot = scanDir(input);
-  }
-
-  const clipboardJSON = JSON.stringify(snapshot, null, 2); // <- garante JSON válido
+export async function copy(dir: string, extensions?: string[]) {
+  const snapshot = scanDir(dir, { extensions });
+  const clipboardJSON = JSON.stringify(snapshot, null, 2);
   await copyToClipboard(clipboardJSON);
+  process.stdout.write(`✔ Snapshot of ${dir} copied to clipboard\n`);
 }
