@@ -1,9 +1,10 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.prompt = void 0;
+exports.prompt = prompt;
 // src/cli/commands/prompt.ts
 const scan_1 = require("../../core/scan");
 const clipboard_1 = require("../../core/clipboard");
+const vm_1 = require("../../core/vm");
 async function prompt(dir, userPrompt) {
     const snapshot = (0, scan_1.scanDir)(dir);
     const template = `
@@ -45,13 +46,13 @@ USER REQUEST
 ${userPrompt}
 `;
     try {
+        (0, vm_1.runInVm)(`module.exports = async function() { return ${JSON.stringify(template.trim())}; }`)();
         await (0, clipboard_1.copyToClipboard)(template.trim());
         process.stdout.write(template.trim());
         process.stdout.write("\n\n✔ Prompt + Snapshot copied to clipboard\n");
     }
     catch (e) {
         process.stdout.write(template.trim());
-        process.stderr.write("\n✖ Failed to copy to clipboard (output only)\n");
+        process.stderr.write("\n✖ Failed to execute in VM or copy to clipboard\n");
     }
 }
-exports.prompt = prompt;

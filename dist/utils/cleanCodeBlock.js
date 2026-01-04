@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.default = cleanCodeBlock;
 function cleanCodeBlock(content) {
     const langMatch = content.match(/^```(\w+)?/);
     const lang = langMatch ? langMatch[1] : null;
@@ -9,4 +10,3 @@ function cleanCodeBlock(content) {
     cleaned = cleaned.trim();
     return { lang, cleaned };
 }
-exports.default = cleanCodeBlock;

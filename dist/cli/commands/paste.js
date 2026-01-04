@@ -3,8 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.paste = void 0;
-// src/cli/commands/paste.ts
+exports.paste = paste;
 const write_1 = require("../../core/write");
 const clipboard_1 = require("../../core/clipboard");
 const cleanCodeBlock_1 = __importDefault(require("../../utils/cleanCodeBlock"));
@@ -25,7 +24,6 @@ async function paste(dir) {
         if (!Array.isArray(files)) {
             throw new Error("Clipboard content is not a JSON array");
         }
-        // Validação simples do snapshot
         const isValidSnapshot = files.every(f => typeof f.path === 'string' && typeof f.content === 'string');
         if (!isValidSnapshot) {
             throw new Error("JSON does not match FileSnapshot structure {path, content}");
@@ -41,4 +39,3 @@ async function paste(dir) {
         process.exit(1);
     }
 }
-exports.paste = paste;

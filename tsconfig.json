@@ -3,14 +3,23 @@
     "target": "ES2020",
     "module": "NodeNext",
     "moduleResolution": "NodeNext",
-    "baseUrl": "./src",
+    "baseUrl": ".",
     "paths": {
-      "*": ["*", "core/*"]
+      "*": ["src/*", "core/*", "cli/*"]
     },
     "outDir": "dist",
-    "rootDir": "src",
+    "rootDir": ".",
     "esModuleInterop": true,
     "strict": true,
     "skipLibCheck": true
-  }
+  },
+  "include": [
+    "src/**/*",
+    "core/**/*",
+    "cli/**/*"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist"
+  ]
 }

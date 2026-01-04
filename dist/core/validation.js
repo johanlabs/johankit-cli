@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.validatePatches = void 0;
+exports.validatePatches = validatePatches;
 function validatePatches(json) {
     if (!Array.isArray(json)) {
         throw new Error("Validation Error: Input is not a JSON array.");
@@ -21,4 +21,3 @@ function validatePatches(json) {
         return item;
     });
 }
-exports.validatePatches = validatePatches;

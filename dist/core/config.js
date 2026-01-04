@@ -3,8 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.loadConfig = void 0;
-// src/core/config.ts
+exports.loadConfig = loadConfig;
 const path_1 = __importDefault(require("path"));
 const fs_1 = require("fs");
 const js_yaml_1 = require("js-yaml");
@@ -18,12 +17,6 @@ const DEFAULT_IGNORE = [
     "tmp",
     "temp",
 ];
-/**
- * Tenta carregar as configurações do arquivo johankit.yaml na basePath.
- * Retorna um objeto Config com defaults se o arquivo não for encontrado.
- * @param basePath O diretório base para procurar o arquivo de configuração.
- * @returns O objeto de configuração.
- */
 function loadConfig(basePath) {
     const configPath = path_1.default.join(basePath, CONFIG_FILENAME);
     try {
@@ -38,7 +31,6 @@ function loadConfig(basePath) {
     }
     catch (error) {
         if (error instanceof Error && error.code === "ENOENT") {
-            // Arquivo não encontrado, retorna configuração padrão
             return {
                 ignore: DEFAULT_IGNORE,
             };
@@ -49,4 +41,3 @@ function loadConfig(basePath) {
         };
     }
 }
-exports.loadConfig = loadConfig;

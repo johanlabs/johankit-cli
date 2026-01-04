@@ -2,8 +2,9 @@
 import { writeFiles } from "../../core/write";
 import { readClipboard } from "../../core/clipboard";
 import cleanCodeBlock from "../../utils/cleanCodeBlock";
+import { execSync } from "child_process";
 
-export async function paste(dir: string) {
+export async function paste(dir: string, runAll = false) {
     try {
         const content = await readClipboard();
 
@@ -13,7 +14,7 @@ export async function paste(dir: string) {
 
         let files;
         try {
-            const { lang, cleaned } = cleanCodeBlock(content) 
+            const { cleaned } = cleanCodeBlock(content);
             files = JSON.parse(cleaned);
         } catch (e) {
             throw new Error("Clipboard content is not valid JSON");
@@ -23,17 +24,22 @@ export async function paste(dir: string) {
             throw new Error("Clipboard content is not a JSON array");
         }
 
-        // Validação simples do snapshot
-        const isValidSnapshot = files.every(f =>
-            typeof f.path === 'string' && typeof f.content === 'string'
-        );
-
-        if (!isValidSnapshot) {
-            throw new Error("JSON does not match FileSnapshot structure {path, content}");
+        for (const item of files) {
+            if (item.type === 'console') {
+                if (runAll) {
+                    console.log(`> Executing: ${item.command}`);
+                    execSync(item.command, { stdio: 'inherit', cwd: dir });
+                } else {
+                    console.log(`> Skipped command: ${item.command} (use flag to run)`);
+                }
+            } else if (item.path && typeof item.content === 'string') {
+                writeFiles(dir, [item], true);
+            } else {
+                throw new Error(`Invalid item in clipboard: ${JSON.stringify(item)}`);
+            }
         }
 
-        writeFiles(dir, files, true);
-        process.stdout.write("✔ Pasted from clipboard\n");
+        process.stdout.write("✔ Paste completed\n");
     } catch (error) {
         process.stderr.write("✖ Paste failed\n");
         if (error instanceof Error) {

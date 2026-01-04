@@ -1,15 +1,15 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.sync = void 0;
+exports.sync = sync;
 // src/cli/commands/sync.ts
 const scan_1 = require("../../core/scan");
 const diff_1 = require("../../core/diff");
 const clipboard_1 = require("../../core/clipboard");
 const validation_1 = require("../../core/validation");
+const vm_1 = require("../../core/vm");
 async function sync(dir) {
     try {
         const snapshotBefore = (0, scan_1.scanDir)(dir);
-        // Gera prompt genérico para AI com snapshot atual
         const template = `
 You are an AI software engineer.
 
@@ -51,14 +51,13 @@ USER REQUEST
 `;
         await (0, clipboard_1.copyToClipboard)(template.trim());
         process.stdout.write("✔ Prompt with snapshot copied to clipboard\n");
-        // Aguarda entrada do usuário (resposta da AI) via stdin
         const input = await readStdin();
         let patches;
         try {
-            patches = JSON.parse(input);
+            patches = (0, vm_1.runInVm)(`module.exports = function() { return ${input}; }`)();
         }
         catch {
-            throw new Error("Invalid JSON input");
+            throw new Error("Invalid JSON input or execution in VM failed");
         }
         const validated = (0, validation_1.validatePatches)(patches);
         (0, diff_1.applyDiff)(dir, validated);
@@ -74,7 +73,6 @@ USER REQUEST
         process.exit(1);
     }
 }
-exports.sync = sync;
 function readStdin() {
     return new Promise(resolve => {
         let data = "";
