@@ -5,7 +5,7 @@ import { applyDiff } from "../../core/diff";
 import { execSync } from "child_process";
 import cleanCodeBlock from "../../utils/cleanCodeBlock";
 import readline from "readline";
-import { copyToClipboard } from "../../core/clipboard";
+import { copyToClipboard, readClipboard } from "../../core/clipboard";
 import fs from "fs";
 import path from "path";
 import * as diff from "diff";
@@ -37,16 +37,31 @@ export async function sync(dir: string, runAll = false, dryRun = false, interact
   const autoAccept = process.argv.includes('-y');
   try {
     const snapshotBefore = scanDir(dir);
-    await copyToClipboard(JSON.stringify(snapshotBefore, null, 2));
-    process.stdout.write('✔ Snapshot copied. Paste AI response and press Ctrl+D (or Ctrl+Z on Win)\n');
+    const systemPrompt = `
+YOU ARE AN AI SOFTWARE ENGINEER.
+ALWAYS RESPOND USING THE FOLLOWING JSON PATCH FORMAT ONLY.
 
-    const input = await readStdin();
+FORMAT:
+[{"path": "file.ts", "content": "full code"}, {"type": "console", "command": "npm install"}]
+
+SNAPSHOT:
+${JSON.stringify(snapshotBefore, null, 2)}
+
+PLEASE APPLY THE USER REQUESTS TO THIS SNAPSHOT AND RETURN ONLY THE JSON ARRAY.`;
+
+    await copyToClipboard(systemPrompt);
+    process.stdout.write('✔ System Prompt + Snapshot copied to clipboard.\n');
+    process.stdout.write('👉 Go to your AI, paste it with your instructions, copy the result, and come back here.\n');
+    
+    await confirm('Press [Enter] when you have the AI response in your clipboard...');
+
+    const input = await readClipboard();
+    if (!input) throw new Error("Clipboard is empty");
+
     const { cleaned } = cleanCodeBlock(input);
     const patches = validatePatches(JSON.parse(cleaned));
 
-    if (dryRun) {
-      process.stdout.write("--- DRY RUN MODE ---\n");
-    }
+    if (dryRun) process.stdout.write("--- DRY RUN MODE ---\n");
 
     for (const patch of patches) {
       if (patch.type === 'console' && patch.command) {
@@ -83,20 +98,10 @@ export async function sync(dir: string, runAll = false, dryRun = false, interact
     if (!dryRun) {
       const snapshotAfter = scanDir(dir);
       await copyToClipboard(JSON.stringify(snapshotAfter, null, 2));
-      process.stdout.write('✔ Sync applied and new snapshot copied\n');
-    } else {
-      process.stdout.write('--- DRY RUN COMPLETED ---\n');
+      process.stdout.write('✔ Sync applied! Updated snapshot is now in your clipboard.\n');
     }
   } catch (e: any) {
     process.stderr.write(`✘ Sync failed: ${e.message}\n`);
     process.exit(1);
   }
-}
-
-function readStdin(): Promise<string> {
-  return new Promise(resolve => {
-    let data = '';
-    process.stdin.on('data', c => (data += c));
-    process.stdin.on('end', () => resolve(data));
-  });
 }
