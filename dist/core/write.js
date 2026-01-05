@@ -8,16 +8,18 @@ exports.writeFiles = writeFiles;
 const fs_1 = __importDefault(require("fs"));
 const path_1 = __importDefault(require("path"));
 const git_1 = require("./git");
+/**
+ * @deprecated Use applyDiff from core/diff for more flexibility (supports deletes and console commands).
+ */
 function writeFiles(basePath, files, commit = true) {
-    if (commit) {
-        (0, git_1.ensureGitCommit)("johankit: before paste");
+    if (commit && files.length > 0) {
+        (0, git_1.ensureGitCommit)("johankit: before write");
     }
     for (const file of files) {
+        if (!file.path)
+            continue;
         const fullPath = path_1.default.join(basePath, file.path);
-        const dir = path_1.default.dirname(fullPath);
-        if (!fs_1.default.existsSync(dir)) {
-            fs_1.default.mkdirSync(dir, { recursive: true });
-        }
-        fs_1.default.writeFileSync(fullPath, file.content, "utf8");
+        fs_1.default.mkdirSync(path_1.default.dirname(fullPath), { recursive: true });
+        fs_1.default.writeFileSync(fullPath, file.content || "", "utf8");
     }
 }
