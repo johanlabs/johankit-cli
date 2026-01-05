@@ -4,9 +4,6 @@ import path from "path";
 import { FileSnapshot } from "../types";
 import { ensureGitCommit } from "./git";
 
-/**
- * @deprecated Use applyDiff from core/diff for more flexibility (supports deletes and console commands).
- */
 export function writeFiles(basePath: string, files: FileSnapshot[], commit = true) {
   if (commit && files.length > 0) {
     ensureGitCommit("johankit: before write");

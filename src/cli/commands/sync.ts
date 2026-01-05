@@ -17,17 +17,22 @@ async function confirm(msg: string): Promise<boolean> {
   });
 }
 
+function readStdin(): Promise<string> {
+  return new Promise(resolve => {
+    let data = "";
+    process.stdin.on("data", c => (data += c));
+    process.stdin.on("end", () => resolve(data));
+  });
+}
+
 export async function sync(dir: string, runAll = false) {
   const autoAccept = process.argv.includes("-y");
   try {
     const snapshotBefore = scanDir(dir);
-    const template = `
-// ... (template mantido) ...
-${JSON.stringify(snapshotBefore, null, 2)}
-`;
+    const template = `SNAPSHOT\n${JSON.stringify(snapshotBefore, null, 2)}`;
 
     await copyToClipboard(template.trim());
-    process.stdout.write("✔ Prompt with snapshot copied to clipboard. Paste the response here and press Enter (Ctrl+D to finish):\n");
+    process.stdout.write("✔ Snapshot copied. Paste response and press Ctrl+D:\n");
 
     const input = await readStdin();
     const { cleaned } = cleanCodeBlock(input);
@@ -38,8 +43,6 @@ ${JSON.stringify(snapshotBefore, null, 2)}
         if (runAll) {
           const shouldRun = autoAccept || await confirm(`> Execute: ${patch.command}`);
           if (shouldRun) execSync(patch.command, { stdio: 'inherit', cwd: dir });
-        } else {
-          console.log(`> Skipped command: ${patch.command} (use --run)`);
         }
       } else if (patch.path) {
         applyDiff(dir, [patch]);
@@ -48,17 +51,9 @@ ${JSON.stringify(snapshotBefore, null, 2)}
 
     const snapshotAfter = scanDir(dir);
     await copyToClipboard(JSON.stringify(snapshotAfter, null, 2));
-    process.stdout.write("✔ Sync applied and new snapshot copied to clipboard\n");
+    process.stdout.write("✔ Sync applied\n");
   } catch (error: any) {
     process.stderr.write(`✖ Sync failed: ${error.message}\n`);
     process.exit(1);
   }
-}
-
-function readStdin(): Promise<string> {
-  return new Promise(resolve => {
-    let data = "";
-    process.stdin.on("data", c => (data += c));
-    process.stdin.on("end", () => resolve(data));
-  });
 }
