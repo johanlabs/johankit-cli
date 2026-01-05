@@ -4,26 +4,18 @@ import path from "path";
 import { FileSnapshot } from "../types";
 import { ensureGitCommit } from "./git";
 
-export function writeFiles(
-  basePath: string,
-  files: FileSnapshot[],
-  commit = true
-) {
+/**
+ * @deprecated Use applyDiff from core/diff for more flexibility (supports deletes and console commands).
+ */
+export function writeFiles(basePath: string, files: FileSnapshot[], commit = true) {
   if (commit && files.length > 0) {
-    ensureGitCommit("johankit: before paste");
+    ensureGitCommit("johankit: before write");
   }
 
   for (const file of files) {
-    // Ignora itens que não têm path ou content (como comandos de console)
-    if (!file.path || typeof file.content !== 'string') continue;
-
+    if (!file.path) continue;
     const fullPath = path.join(basePath, file.path);
-    const dir = path.dirname(fullPath);
-
-    if (!fs.existsSync(dir)) {
-      fs.mkdirSync(dir, { recursive: true });
-    }
-
-    fs.writeFileSync(fullPath, file.content, "utf8");
+    fs.mkdirSync(path.dirname(fullPath), { recursive: true });
+    fs.writeFileSync(fullPath, file.content || "", "utf8");
   }
 }

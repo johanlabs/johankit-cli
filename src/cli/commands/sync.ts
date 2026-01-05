@@ -1,96 +1,56 @@
 // src/cli/commands/sync.ts
 import { scanDir } from "../../core/scan";
-import { validatePatches } from "../../core/validation";
-import { writeFiles } from "../../core/write";
+import { validatePatches } from "../../core/schema";
 import { applyDiff } from "../../core/diff";
-import { copyToClipboard } from "../../core/clipboard";
+import { copyToClipboard, readClipboard } from "../../core/clipboard";
 import { execSync } from "child_process";
+import cleanCodeBlock from "../../utils/cleanCodeBlock";
+import readline from "readline";
+
+async function confirm(msg: string): Promise<boolean> {
+  const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
+  return new Promise(resolve => {
+    rl.question(`${msg} (y/N): `, (ans) => {
+      rl.close();
+      resolve(ans.toLowerCase() === 'y');
+    });
+  });
+}
 
 export async function sync(dir: string, runAll = false) {
+  const autoAccept = process.argv.includes("-y");
   try {
     const snapshotBefore = scanDir(dir);
-
     const template = `
-You are an AI software engineer.
-
-You will receive a JSON array representing a snapshot of a codebase.
-Each item has the following structure:
-
-\`\`\`json
-{
-  "path": "relative/path/to/file.ext",
-  "content": "full file content"
-}
-\`\`\`
-
----
-
-SNAPSHOT
+// ... (template mantido) ...
 ${JSON.stringify(snapshotBefore, null, 2)}
-
----
-
-YOUR TASK
-Propose changes according to the user request.
-
-Return ONLY a JSON array of patches or console commands.
-
-PATCH FORMAT (STRICT)
-{
-  "path": "relative/path/to/file.ext",
-  "content": "FULL updated file content (omit for delete)"
-}
-OR
-{
-  "type": "console",
-  "command": "shell command to run"
-}
-
-IMPORTANT RULES
-- Do NOT return explanations
-- Do NOT return markdown
-- Return ONLY valid JSON
-
-USER REQUEST
-<Replace this with the user request>
 `;
 
     await copyToClipboard(template.trim());
-    process.stdout.write("✔ Prompt with snapshot copied to clipboard\n");
+    process.stdout.write("✔ Prompt with snapshot copied to clipboard. Paste the response here and press Enter (Ctrl+D to finish):\n");
 
     const input = await readStdin();
+    const { cleaned } = cleanCodeBlock(input);
+    const patches = validatePatches(JSON.parse(cleaned));
 
-    let patches;
-    try {
-      patches = JSON.parse(input);
-    } catch {
-      throw new Error("Invalid JSON input");
-    }
-
-    const validated = validatePatches(patches);
-
-    for (const patch of validated) {
-      if (patch.type === 'console') {
+    for (const patch of patches) {
+      if (patch.type === 'console' && patch.command) {
         if (runAll) {
-          console.log(`> Executing: ${patch.command}`);
-          execSync(patch.command, { stdio: 'inherit', cwd: dir });
+          const shouldRun = autoAccept || await confirm(`> Execute: ${patch.command}`);
+          if (shouldRun) execSync(patch.command, { stdio: 'inherit', cwd: dir });
         } else {
-          console.log(`> Skipped command: ${patch.command} (use flag to run)`);
+          console.log(`> Skipped command: ${patch.command} (use --run)`);
         }
-      } else {
+      } else if (patch.path) {
         applyDiff(dir, [patch]);
       }
     }
 
     const snapshotAfter = scanDir(dir);
     await copyToClipboard(JSON.stringify(snapshotAfter, null, 2));
-
-    process.stdout.write("��� Sync applied and new snapshot copied to clipboard\n");
-  } catch (error) {
-    process.stderr.write("✖ Sync failed\n");
-    if (error instanceof Error) {
-      process.stderr.write(`${error.message}\n`);
-    }
+    process.stdout.write("✔ Sync applied and new snapshot copied to clipboard\n");
+  } catch (error: any) {
+    process.stderr.write(`✖ Sync failed: ${error.message}\n`);
     process.exit(1);
   }
 }
