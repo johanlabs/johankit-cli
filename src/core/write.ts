@@ -9,11 +9,14 @@ export function writeFiles(
   files: FileSnapshot[],
   commit = true
 ) {
-  if (commit) {
+  if (commit && files.length > 0) {
     ensureGitCommit("johankit: before paste");
   }
 
   for (const file of files) {
+    // Ignora itens que não têm path ou content (como comandos de console)
+    if (!file.path || typeof file.content !== 'string') continue;
+
     const fullPath = path.join(basePath, file.path);
     const dir = path.dirname(fullPath);
 
