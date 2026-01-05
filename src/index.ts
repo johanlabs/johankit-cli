@@ -10,8 +10,7 @@ const command = args[0];
 
 async function main() {
   const runAll = process.argv.includes("--run");
-  // Removemos a flag --run dos argumentos para não confundir os diretórios
-  const cleanArgs = args.filter(a => a !== "--run");
+  const cleanArgs = args.filter(a => a !== "--run" && a !== "-y");
 
   try {
     switch (command) {
@@ -60,12 +59,13 @@ function help() {
   console.log(`
 Usage:
   johankit copy <dir> [exts]
-  johankit paste <dir> [--run]
+  johankit paste <dir> [--run] [-y]
   johankit prompt <dir> "<user request>"
-  johankit sync <dir> [--run]
+  johankit sync <dir> [--run] [-y]
 
 Options:
   --run    Execute console commands during paste/sync
+  -y       Auto-accept all console commands (no prompt)
 `);
 }
 

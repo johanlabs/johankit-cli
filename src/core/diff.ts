@@ -1,31 +1,20 @@
 // src/core/diff.ts
 import fs from "fs";
 import path from "path";
+import { PatchItem } from "./schema";
 
-export interface DiffPatch {
-  type: "modify" | "create" | "delete";
-  path: string;
-  content?: string;
-}
-
-export function applyDiff(basePath: string, patches: DiffPatch[]) {
+export function applyDiff(basePath: string, patches: PatchItem[]) {
   for (const patch of patches) {
+    if (!patch.path) continue;
     const fullPath = path.join(basePath, patch.path);
 
-    switch (patch.type) {
-      case "delete": {
-        if (fs.existsSync(fullPath)) {
-          fs.unlinkSync(fullPath);
-        }
-        break;
+    if (patch.content === null || patch.content === undefined) {
+      if (fs.existsSync(fullPath)) {
+        fs.unlinkSync(fullPath);
       }
-
-      case "create":
-      case "modify": {
-        fs.mkdirSync(path.dirname(fullPath), { recursive: true });
-        fs.writeFileSync(fullPath, patch.content ?? "", "utf8");
-        break;
-      }
+    } else {
+      fs.mkdirSync(path.dirname(fullPath), { recursive: true });
+      fs.writeFileSync(fullPath, patch.content, "utf8");
     }
   }
 }

@@ -3,19 +3,19 @@ import { spawn } from "child_process";
 
 export function copyToClipboard(text: string): Promise<void> {
   return new Promise((resolve, reject) => {
+    const platform = process.platform;
     let command = "xclip";
     let args = ["-selection", "clipboard"];
 
-    if (process.platform === "darwin") {
+    if (platform === "darwin") {
       command = "pbcopy";
       args = [];
-    } else if (process.platform === "win32") {
+    } else if (platform === "win32") {
       command = "clip";
       args = [];
     }
 
-    const child = spawn(command, args, { stdio: ["pipe", "ignore", "ignore"] });
-
+    const child = spawn(command, args);
     child.on("error", (err) => reject(err));
     child.on("close", () => resolve());
 
@@ -26,18 +26,19 @@ export function copyToClipboard(text: string): Promise<void> {
 
 export function readClipboard(): Promise<string> {
   return new Promise((resolve, reject) => {
+    const platform = process.platform;
     let command = "xclip";
     let args = ["-selection", "clipboard", "-o"];
 
-    if (process.platform === "darwin") {
+    if (platform === "darwin") {
       command = "pbpaste";
       args = [];
-    } else if (process.platform === "win32") {
+    } else if (platform === "win32") {
       command = "powershell";
-      args = ["-command", "Get-Clipboard"];
+      args = ["-NoProfile", "-Command", "Get-Clipboard"];
     }
 
-    const child = spawn(command, args, { stdio: ["ignore", "pipe", "pipe"] });
+    const child = spawn(command, args);
     let output = "";
     let error = "";
 
