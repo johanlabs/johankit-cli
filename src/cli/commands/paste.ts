@@ -24,9 +24,10 @@ function showDiff(filename: string, oldContent: string, newContent: string) {
   console.log(`\n--- DIFF FOR: ${filename.bold} ---`);
   const patches = diff.diffLines(oldContent, newContent);
   patches.forEach((part) => {
-    const color = part.added ? 'green' : part.removed ? 'red' : 'grey';
+    const color = part.added ? 'green' : part.removed ? 'red' : 'gray';
     const prefix = part.added ? '+' : part.removed ? '-' : ' ';
-    process.stdout.write((part.value.split('\n').map(line => line ? `${prefix}${line}` : '').join('\n'))[color]);
+    const value = part.value.endsWith('\n') ? part.value : part.value + '\n';
+    process.stdout.write((value.split('\n').map(line => line ? `${prefix}${line}` : '').join('\n'))[color as any]);
   });
   console.log('\n-----------------------');
 }
