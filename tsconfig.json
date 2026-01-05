@@ -5,7 +5,7 @@
     "moduleResolution": "NodeNext",
     "baseUrl": ".",
     "paths": {
-      "*": ["src/*", "core/*", "cli/*"]
+      "*": ["src/*", "src/core/core/*", "cli/*"]
     },
     "outDir": "dist",
     "rootDir": ".",
@@ -15,7 +15,7 @@
   },
   "include": [
     "src/**/*",
-    "core/**/*",
+    "src/core/core/**/*",
     "cli/**/*"
   ],
   "exclude": [
