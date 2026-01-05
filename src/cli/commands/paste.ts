@@ -36,6 +36,7 @@ export async function paste(dir: string, runAll = false) {
           console.log(`> Skipped command: ${item.command} (use --run)`);
         }
       } else if (item.path) {
+        // Agora usamos applyDiff que aceita content null para deletar e ignora type
         applyDiff(dir, [item]);
       }
     }
