@@ -16,8 +16,9 @@ async function confirm(msg: string): Promise<boolean> {
   });
 }
 
-export async function paste(dir: string, runAll = false) {
+export async function paste(dir: string, runAll = false, dryRun = false) {
   const autoAccept = process.argv.includes("-y");
+
   try {
     const content = await readClipboard();
     if (!content) throw new Error("Clipboard empty");
@@ -25,8 +26,16 @@ export async function paste(dir: string, runAll = false) {
     const { cleaned } = cleanCodeBlock(content);
     const items = validatePatches(JSON.parse(cleaned));
 
+    if (dryRun) {
+      process.stdout.write("--- DRY RUN MODE ---\n");
+    }
+
     for (const item of items) {
       if (item.type === 'console' && item.command) {
+        if (dryRun) {
+          process.stdout.write(`[DRY-RUN] Would execute: ${item.command}\n`);
+          continue;
+        }
         if (runAll) {
           const shouldRun = autoAccept || await confirm(`> Execute: ${item.command}`);
           if (shouldRun) {
@@ -36,14 +45,18 @@ export async function paste(dir: string, runAll = false) {
           console.log(`> Skipped command: ${item.command} (use --run)`);
         }
       } else if (item.path) {
-        // Agora usamos applyDiff que aceita content null para deletar e ignora type
-        applyDiff(dir, [item]);
+        if (dryRun) {
+          const action = item.content === null ? "Delete" : "Write";
+          process.stdout.write(`[DRY-RUN] Would ${action}: ${item.path}\n`);
+        } else {
+          applyDiff(dir, [item]);
+        }
       }
     }
 
-    process.stdout.write("✔ Paste completed\n");
+    process.stdout.write(dryRun ? "--- DRY RUN COMPLETED ---\n" : "✔ Paste completed\n");
   } catch (error: any) {
-    process.stderr.write(`✖ Paste failed: ${error.message}\n`);
+    process.stderr.write(`✘ Paste failed: ${error.message}\n`);
     process.exit(1);
   }
 }
