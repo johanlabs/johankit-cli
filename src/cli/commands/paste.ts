@@ -5,6 +5,10 @@ import { validatePatches } from "../../core/schema";
 import cleanCodeBlock from "../../utils/cleanCodeBlock";
 import { execSync } from "child_process";
 import readline from "readline";
+import fs from "fs";
+import path from "path";
+import * as diff from "diff";
+import "colors";
 
 async function confirm(msg: string): Promise<boolean> {
   const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
@@ -16,7 +20,18 @@ async function confirm(msg: string): Promise<boolean> {
   });
 }
 
-export async function paste(dir: string, runAll = false, dryRun = false) {
+function showDiff(filename: string, oldContent: string, newContent: string) {
+  console.log(`\n--- DIFF FOR: ${filename.bold} ---`);
+  const patches = diff.diffLines(oldContent, newContent);
+  patches.forEach((part) => {
+    const color = part.added ? 'green' : part.removed ? 'red' : 'grey';
+    const prefix = part.added ? '+' : part.removed ? '-' : ' ';
+    process.stdout.write((part.value.split('\n').map(line => line ? `${prefix}${line}` : '').join('\n'))[color]);
+  });
+  console.log('\n-----------------------');
+}
+
+export async function paste(dir: string, runAll = false, dryRun = false, interactiveDiff = false) {
   const autoAccept = process.argv.includes("-y");
 
   try {
@@ -26,37 +41,41 @@ export async function paste(dir: string, runAll = false, dryRun = false) {
     const { cleaned } = cleanCodeBlock(content);
     const items = validatePatches(JSON.parse(cleaned));
 
-    if (dryRun) {
-      process.stdout.write("--- DRY RUN MODE ---\n");
-    }
+    if (dryRun) process.stdout.write("--- DRY RUN MODE ---\n");
 
     for (const item of items) {
       if (item.type === 'console' && item.command) {
         if (dryRun) {
           process.stdout.write(`[DRY-RUN] Would execute: ${item.command}\n`);
-          continue;
-        }
-        if (runAll) {
-          const shouldRun = autoAccept || await confirm(`> Execute: ${item.command}`);
-          if (shouldRun) {
+        } else if (runAll) {
+          if (autoAccept || await confirm(`> Execute: ${item.command}`)) {
             execSync(item.command, { stdio: 'inherit', cwd: dir });
           }
-        } else {
-          console.log(`> Skipped command: ${item.command} (use --run)`);
         }
       } else if (item.path) {
-        if (dryRun) {
-          const action = item.content === null ? "Delete" : "Write";
-          process.stdout.write(`[DRY-RUN] Would ${action}: ${item.path}\n`);
+        const fullPath = path.join(dir, item.path);
+        const exists = fs.existsSync(fullPath);
+        const oldContent = exists ? fs.readFileSync(fullPath, 'utf8') : "";
+        const newContent = item.content || "";
+
+        if (interactiveDiff && item.content !== null) {
+          showDiff(item.path, oldContent, newContent);
+          if (await confirm(`Apply changes to ${item.path}?`)) {
+            applyDiff(dir, [item]);
+          } else {
+            console.log(`Skipped: ${item.path}`);
+          }
+        } else if (dryRun) {
+          process.stdout.write(`[DRY-RUN] Would ${item.content === null ? 'Delete' : 'Write'}: ${item.path}\n`);
         } else {
           applyDiff(dir, [item]);
         }
       }
     }
 
-    process.stdout.write(dryRun ? "--- DRY RUN COMPLETED ---\n" : "✔ Paste completed\n");
+    process.stdout.write("✔ Operation completed\n");
   } catch (error: any) {
-    process.stderr.write(`✘ Paste failed: ${error.message}\n`);
+    process.stderr.write(`✘ Failed: ${error.message}\n`);
     process.exit(1);
   }
 }

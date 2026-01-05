@@ -1,10 +1,8 @@
-// src/core/config.ts
 import path from "path";
-import { readFileSync } from "fs";
+import { readFileSync, existsSync } from "fs";
 import { load } from "js-yaml";
 import { Config } from "../types";
 
-const CONFIG_FILENAME = "johankit.yaml";
 const DEFAULT_IGNORE = [
   ".git",
   "node_modules",
@@ -15,36 +13,28 @@ const DEFAULT_IGNORE = [
   "temp",
 ];
 
-/**
- * Tenta carregar as configurações do arquivo johankit.yaml na basePath.
- * Retorna um objeto Config com defaults se o arquivo não for encontrado.
- * @param basePath O diretório base para procurar o arquivo de configuração.
- * @returns O objeto de configuração.
- */
 export function loadConfig(basePath: string): Config {
-  const configPath = path.join(basePath, CONFIG_FILENAME);
+  // Lista de possíveis nomes para o arquivo de configuração
+  const configFilenames = ["johankit.yaml", "johankit.yml"];
+  let loadedConfig: Partial<Config> = {};
 
-  try {
-    const content = readFileSync(configPath, "utf8");
-    const loadedConfig = load(content) as Partial<Config>;
-
-    return {
-      ignore: [
-        ...DEFAULT_IGNORE,
-        ...(loadedConfig.ignore || []),
-      ],
-    };
-  } catch (error) {
-    if (error instanceof Error && (error as any).code === "ENOENT") {
-      // Arquivo não encontrado, retorna configuração padrão
-      return {
-        ignore: DEFAULT_IGNORE,
-      };
+  for (const filename of configFilenames) {
+    const configPath = path.join(basePath, filename);
+    if (existsSync(configPath)) {
+      try {
+        const content = readFileSync(configPath, "utf8");
+        loadedConfig = (load(content) as Partial<Config>) || {};
+        break; // Para no primeiro que encontrar
+      } catch (error) {
+        console.warn(`[johankit] Erro ao ler ${filename}, tentando próximo...`);
+      }
     }
-
-    console.warn(`[johankit] Aviso: Falha ao carregar ${CONFIG_FILENAME}. Usando defaults.`, error);
-    return {
-      ignore: DEFAULT_IGNORE,
-    };
   }
+
+  // Set para garantir que não existam duplicatas nos padrões de ignore
+  const ignoreSet = new Set([...DEFAULT_IGNORE, ...(loadedConfig.ignore || [])]);
+
+  return {
+    ignore: Array.from(ignoreSet),
+  };
 }

@@ -4,7 +4,7 @@
   "description": "Developer-friendly CLI for codebase snapshots and AI vibe-coding.",
   "main": "dist/index.js",
   "bin": {
-    "johankit": "./dist/index.js"
+    "johankit": "./dist/src/index.js"
   },
   "scripts": {
     "test": "jest",
@@ -33,7 +33,9 @@
   },
   "dependencies": {
     "clipboardy": "^4.0.0",
+    "colors": "^1.4.0",
     "commander": "^11.0.0",
+    "diff": "^8.0.2",
     "js-yaml": "^4.1.1",
     "vm2": "^3.10.0"
   }

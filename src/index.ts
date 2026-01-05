@@ -21,7 +21,8 @@ program
   .option('--run', 'execute console commands')
   .option('-y', 'auto accept commands without confirmation')
   .option('--dry-run', 'list changes without applying them')
-  .action((dir = '.', opts) => paste(dir, !!opts.run, !!opts.dryRun));
+  .option('--diff', 'show diff and ask for confirmation for each file')
+  .action((dir = '.', opts) => paste(dir, !!opts.run, !!opts.dryRun, !!opts.diff));
 
 program
   .command('prompt [dir] <request...>')
@@ -32,6 +33,7 @@ program
   .option('--run', 'execute console commands')
   .option('-y', 'auto accept commands without confirmation')
   .option('--dry-run', 'list changes without applying them')
+  .option('--diff', 'show diff and ask for confirmation for each file')
   .action((dir = '.', opts) => sync(dir, !!opts.run, !!opts.dryRun));
 
 program.parse();

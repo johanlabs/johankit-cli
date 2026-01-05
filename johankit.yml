@@ -1,0 +1,6 @@
+ignore:
+  - node_modules
+  - .git
+  - dist
+  - yarn.lock
+  - package-lock.json
